@@ -4,6 +4,9 @@ import com.example.plus_assignment.domain.post.dto.request.PostRequestDto;
 import com.example.plus_assignment.domain.post.dto.response.PostDetailResponseDto;
 import com.example.plus_assignment.domain.post.dto.response.PostPreviewResponseDto;
 import com.example.plus_assignment.domain.post.entity.Post;
+import com.example.plus_assignment.domain.post.exception.ForbiddenAccessException;
+import com.example.plus_assignment.domain.post.exception.NotFoundPostException;
+import com.example.plus_assignment.domain.post.exception.PostErrorCode;
 import com.example.plus_assignment.domain.post.repository.PostRepository;
 import com.example.plus_assignment.domain.post.service.PostService;
 import com.example.plus_assignment.domain.user.entity.User;
@@ -126,13 +129,13 @@ public class PostServiceImpl implements PostService {
 
     private Post findPostById(Long id){
         return postRepository.findById(id)
-            .orElseThrow(()->new IllegalArgumentException("해당하는 게시글이 없습니다."));
+            .orElseThrow(()->new NotFoundPostException(PostErrorCode.NOT_FOUND_POST));
 
     }
 
     private void validatePostUser(User user, Post post){
         if(!post.getUser().equals(user)){
-            throw new IllegalArgumentException("알맞지않은 유저입니다.");
+            throw new ForbiddenAccessException(PostErrorCode.FORBIDDEN_ACCESS);
         }
     }
 }
