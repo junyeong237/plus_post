@@ -3,9 +3,14 @@ package com.example.plus_assignment.domain.comment.service.impl;
 import com.example.plus_assignment.domain.comment.dto.request.CommentRequestDto;
 import com.example.plus_assignment.domain.comment.dto.response.CommentResponseDto;
 import com.example.plus_assignment.domain.comment.entity.Comment;
+import com.example.plus_assignment.domain.comment.exception.CommentErrorCode;
+import com.example.plus_assignment.domain.comment.exception.ForbiddenAccessCommentException;
+import com.example.plus_assignment.domain.comment.exception.NotFoundCommentException;
 import com.example.plus_assignment.domain.comment.repository.CommentRepository;
 import com.example.plus_assignment.domain.comment.service.CommentService;
 import com.example.plus_assignment.domain.post.entity.Post;
+import com.example.plus_assignment.domain.post.exception.NotFoundPostException;
+import com.example.plus_assignment.domain.post.exception.PostErrorCode;
 import com.example.plus_assignment.domain.post.repository.PostRepository;
 import com.example.plus_assignment.domain.user.entity.User;
 import com.example.plus_assignment.domain.user.exception.NotFoundUserException;
@@ -89,7 +94,7 @@ public class CommentServiceImpl implements CommentService {
 
     private Post findPostById(Long id){
         return postRepository.findById(id)
-            .orElseThrow(()->new IllegalArgumentException("해당하는 게시글이 없습니다."));
+            .orElseThrow(()->new NotFoundPostException(PostErrorCode.NOT_FOUND_POST));
 
     }
 
@@ -100,12 +105,12 @@ public class CommentServiceImpl implements CommentService {
 
     private Comment findCommentById(Long id){
         return commentRepository.findById(id)
-            .orElseThrow(()->new IllegalArgumentException("해당하는 댓글이 없습니다."));
+            .orElseThrow(()->new NotFoundCommentException(CommentErrorCode.NOT_FOUND_Comment));
     }
 
     private void validateCommentUser(User user, Comment comment){
         if(!comment.getUser().equals(user)){
-            throw new IllegalArgumentException("알맞지않은 유저입니다.");
+            throw new ForbiddenAccessCommentException(CommentErrorCode.FORBIDDEN_ACCESS_COMMENT);
         }
     }
 

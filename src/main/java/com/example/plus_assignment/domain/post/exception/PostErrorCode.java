@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum PostErrorCode implements ErrorCode {
 
     NOT_FOUND_POST(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다."),
-    FORBIDDEN_ACCESS(HttpStatus.BAD_REQUEST, "작성자만 게시글를 수정/삭제할 수 있습니다.");
+    FORBIDDEN_ACCESS_POST(HttpStatus.BAD_REQUEST, "작성자만 게시글를 수정/삭제할 수 있습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

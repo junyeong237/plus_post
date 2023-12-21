@@ -4,7 +4,7 @@ import com.example.plus_assignment.domain.post.dto.request.PostRequestDto;
 import com.example.plus_assignment.domain.post.dto.response.PostDetailResponseDto;
 import com.example.plus_assignment.domain.post.dto.response.PostPreviewResponseDto;
 import com.example.plus_assignment.domain.post.entity.Post;
-import com.example.plus_assignment.domain.post.exception.ForbiddenAccessException;
+import com.example.plus_assignment.domain.post.exception.ForbiddenAccessPostException;
 import com.example.plus_assignment.domain.post.exception.NotFoundPostException;
 import com.example.plus_assignment.domain.post.exception.PostErrorCode;
 import com.example.plus_assignment.domain.post.repository.PostRepository;
@@ -135,7 +135,7 @@ public class PostServiceImpl implements PostService {
 
     private void validatePostUser(User user, Post post){
         if(!post.getUser().equals(user)){
-            throw new ForbiddenAccessException(PostErrorCode.FORBIDDEN_ACCESS);
+            throw new ForbiddenAccessPostException(PostErrorCode.FORBIDDEN_ACCESS_POST);
         }
     }
 }
