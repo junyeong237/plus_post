@@ -5,6 +5,7 @@ import com.example.plus_assignment.domain.user.dto.request.UserSendMailRequestDt
 import com.example.plus_assignment.domain.user.entity.AuthEmail;
 import com.example.plus_assignment.domain.user.repository.AuthEmailRepository;
 import com.example.plus_assignment.global.mail.MailService;
+import com.example.plus_assignment.global.redis.RedisUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Random;
@@ -19,6 +20,8 @@ public class MailServiceImpl implements MailService {
     private int authNumber;
     private final JavaMailSender emailSender;
     private final AuthEmailRepository authEmailRepository;
+    private final RedisUtil redisUtil;
+    private static final int DURATION = 3;
 
     @Value("${spring.mail.username}")
     private String email;
@@ -36,7 +39,18 @@ public class MailServiceImpl implements MailService {
 
 
     public String sendMail(String mail){
+        makeRandomNumber();
         MimeMessage emailForm = createEmailForm(mail);
+
+//        String code = createAuthCode();
+//        MimeMessage message = createMessage(to, subject, code);
+//
+        if (redisUtil.hasMail(mail)) {
+            redisUtil.deleteMail(mail);
+        }
+        redisUtil.addMailList(mail, String.valueOf(authNumber), DURATION);
+//        mailSender.send(message);
+
         //try {
             emailSender.send(emailForm);
 //        } catch (RuntimeException e) {
@@ -50,7 +64,6 @@ public class MailServiceImpl implements MailService {
     // 발신할 이메일 데이터 세팅
     private MimeMessage createEmailForm(String toEmail) {
         System.out.println("toEmail = " + toEmail);
-        makeRandomNumber();
         MimeMessage message = emailSender.createMimeMessage();
         //SimpleMailMessage message = new SimpleMailMessage();
         try {
@@ -71,21 +84,18 @@ public class MailServiceImpl implements MailService {
 
     public boolean checkCode(UserCheckCodeRequestDto checkCodeRequestDto) {
 
-//        try {
-//            Object authCode = redisUtil.getCode(to);
-//            return authCode.equals(code);
-//        } catch (Exception e) {
-//            throw new ExpiredCodeException(MailErrorCode.EXPIRED_CODE);
-//        }
-        AuthEmail email = authEmailRepository.findByEmail(checkCodeRequestDto.getEmail())
-            .orElseThrow(()->new IllegalArgumentException("해당하는 이메일이없슴"));
-
-        if(checkCodeRequestDto.getCode().equals(email.getCode())){
-            return true;
+        try {
+            Object authCode = redisUtil.getCode(checkCodeRequestDto.getEmail());
+            return authCode.equals(checkCodeRequestDto.getCode());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("해당하는 이메일이없슴");
         }
+//        AuthEmail email = authEmailRepository.findByEmail(checkCodeRequestDto.getEmail())
+//            .orElseThrow(()->new IllegalArgumentException("해당하는 이메일이없슴"));
 
-
-        return false;
+//        if(checkCodeRequestDto.getCode().equals(email.getCode())){
+//            return true;
+//        }
 
     }
 }
