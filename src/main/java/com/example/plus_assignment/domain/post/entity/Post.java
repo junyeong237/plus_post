@@ -1,8 +1,11 @@
 package com.example.plus_assignment.domain.post.entity;
 
 
+import com.example.plus_assignment.domain.comment.entity.Comment;
 import com.example.plus_assignment.domain.model.TimeEntity;
+import com.example.plus_assignment.domain.post.dto.request.PostRequestDto;
 import com.example.plus_assignment.domain.user.entity.User;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,7 +14,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,11 +44,20 @@ public class Post extends TimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @OneToMany(mappedBy = "post",fetch = FetchType.LAZY,cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Comment> commentList;
+
     @Builder
-    public Post(String title, String content,User user) {
+    private Post(Long id,String title, String content,User user) {
+        this.Id = id;
         this.title = title;
         this.content = content;
         this.user = user;
+    }
+
+    public void update(PostRequestDto postRequestDto){
+        this.title = postRequestDto.getTitle();
+        this.content = postRequestDto.getContent();
     }
 
 
