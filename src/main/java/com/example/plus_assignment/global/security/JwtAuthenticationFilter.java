@@ -4,6 +4,7 @@ package com.example.plus_assignment.global.security;
 import com.example.plus_assignment.domain.user.dto.request.UserLoginRequestDto;
 import com.example.plus_assignment.domain.user.entity.User;
 import com.example.plus_assignment.global.jwt.JwtUtil;
+import com.example.plus_assignment.global.redis.RedisUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,13 +22,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private final JwtUtil jwtUtil;
 
-    //private final RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
 
     public final Integer REFRESH_TOKEN_TIME = 60 * 24 * 14;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil,RedisUtil redisUtil) {
         this.jwtUtil = jwtUtil;
+        this.redisUtil = redisUtil;
         //setFilterProcessesUrl("/api/users/login");
     }
 
@@ -62,15 +64,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         User user = ((UserDetailsImpl) authResult.getPrincipal()).getUser();
 
         String accessToken = jwtUtil.createAccessToken(user.getNickname(),user.getRole().getAuthority());
-       // String refreshToken = jwtUtil.createRefreshToken();
+        String refreshToken = jwtUtil.createRefreshToken();
 
         //response.addHeader(JwtUtil.ACCESS_TOKEN_HEADER, accessToken);
-        jwtUtil.addJwtToCookie(accessToken, response);
+        jwtUtil.addAccessJwtToCookie(accessToken, response);
+        jwtUtil.addRefreshJwtToCookie(refreshToken, response);
         //response.addHeader(JwtUtil.REFRESH_TOKEN_HEADER, refreshToken);
 
-        //refreshToken = refreshToken.split(" ")[1].trim();
+        refreshToken = refreshToken.split(" ")[1].trim();
 
-       //redisUtil.set(refreshToken, user.getId(), REFRESH_TOKEN_TIME);
+       redisUtil.set(refreshToken, user.getId(), REFRESH_TOKEN_TIME);
     }
 
     @Override

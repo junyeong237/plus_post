@@ -1,6 +1,7 @@
 package com.example.plus_assignment.global.config;
 
 import com.example.plus_assignment.global.jwt.JwtUtil;
+import com.example.plus_assignment.global.redis.RedisUtil;
 import com.example.plus_assignment.global.security.JwtAuthenticationFilter;
 import com.example.plus_assignment.global.security.JwtAuthorizationFilter;
 import com.example.plus_assignment.global.security.UserDetailsServiceImpl;
@@ -28,6 +29,7 @@ public class WebSecurityConfig {
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final RedisUtil redisUtil;
 
 
     @Bean
@@ -42,14 +44,14 @@ public class WebSecurityConfig {
     }
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil,redisUtil);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
         return filter;
     }
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtUtil, userDetailsService);
+        return new JwtAuthorizationFilter(jwtUtil, userDetailsService,redisUtil);
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -67,6 +69,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/users/signup/**").permitAll()
                 .requestMatchers("/api/users/login").permitAll()
                 .requestMatchers("/api/email/**").permitAll()
+                .requestMatchers("/api/post/**").permitAll()
                 //.requestMatchers("/api/menus").permitAll()
                 .anyRequest().authenticated() // 그 외 모든 요청 인증처리
         );

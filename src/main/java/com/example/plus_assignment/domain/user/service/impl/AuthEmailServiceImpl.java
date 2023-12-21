@@ -22,7 +22,7 @@ public class AuthEmailServiceImpl implements AuthEmailService {
     }
 
     @Override
-    public void createAuthEmail(String emailName, String code) {
+    public void createAuthEmail(String emailName) {
 
         if(authEmailRepository.existsByEmailAndIsChecked(emailName,true)){
             return; // 이메일인증이 이미 끝난 이메일입니다. 메세지
@@ -30,7 +30,6 @@ public class AuthEmailServiceImpl implements AuthEmailService {
         AuthEmail authEmail = AuthEmail.builder()
             .email(emailName)
             .isChecked(Boolean.FALSE)
-            .code(code)
             .build();
 
         authEmailRepository.save(authEmail);
@@ -43,7 +42,7 @@ public class AuthEmailServiceImpl implements AuthEmailService {
         AuthEmail email = findEmailByName(emailName);
 
         email.updateChecked();
-        email.updateCode(code);
+        //email.updateCode(code);
 
     }
 

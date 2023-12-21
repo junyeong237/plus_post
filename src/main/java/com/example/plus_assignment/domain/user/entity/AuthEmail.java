@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "TB_AUTH_EMAIL")
+@Table(name = "authemails")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class AuthEmail {
@@ -22,18 +22,15 @@ public class AuthEmail {
     private String email;
     private Boolean isChecked;
 
-    private String code = null;
 
     @Builder
-    private AuthEmail(String email, Boolean isChecked,String code) {
+    private AuthEmail(String email, Boolean isChecked) {
         this.email = email;
         this.isChecked = isChecked;
-        this.code = code;
     }
 
     public void updateChecked() {
         this.isChecked = true;
     }
 
-    public void updateCode(String code){this.code = code;}
 }

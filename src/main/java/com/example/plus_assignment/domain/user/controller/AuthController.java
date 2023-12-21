@@ -40,11 +40,10 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginRequestDto request,
+    public ResponseEntity<?> login(@Valid @RequestBody UserLoginRequestDto request,
         HttpServletResponse res) {
 
-        String token = authService.login(request);
-        jwtUtil.addJwtToCookie(token,res);
+        authService.login(request,res);
 
         return ResponseEntity.ok().build();
     }

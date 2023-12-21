@@ -8,12 +8,20 @@ import com.example.plus_assignment.domain.user.dto.request.UserSignUpRequestDto;
 import com.example.plus_assignment.domain.user.dto.response.UserCheckCodeResponseDto;
 import com.example.plus_assignment.domain.user.entity.User;
 import com.example.plus_assignment.domain.user.entity.UserRoleEnum;
+import com.example.plus_assignment.domain.user.exception.ExistsUserEmailException;
+import com.example.plus_assignment.domain.user.exception.ExistsUsernameException;
+import com.example.plus_assignment.domain.user.exception.NotCorrectLoginInput;
+import com.example.plus_assignment.domain.user.exception.PasswordMismatchException;
+import com.example.plus_assignment.domain.user.exception.UnauthorizedEmailException;
+import com.example.plus_assignment.domain.user.exception.UserErrorCode;
 import com.example.plus_assignment.domain.user.repository.AuthEmailRepository;
 import com.example.plus_assignment.domain.user.repository.UserRepositry;
 import com.example.plus_assignment.domain.user.service.AuthEmailService;
 import com.example.plus_assignment.domain.user.service.AuthService;
 import com.example.plus_assignment.global.jwt.JwtUtil;
 import com.example.plus_assignment.global.mail.impl.MailServiceImpl;
+import com.example.plus_assignment.global.redis.RedisUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,21 +31,24 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class AuthServiceImpl implements AuthService {
+
     private final UserRepositry userRepositry;
     private final PasswordEncoder passwordEncoder;
     private final AuthEmailService authEmailService;
     private final MailServiceImpl mailService;
     private final JwtUtil jwtUtil;
+    private final RedisUtil redisUtil;
+    public final Integer REFRESH_TOKEN_TIME =  60 * 60 * 1000 * 24 * 14;
     @Override
     public void signup(final UserSignUpRequestDto signUpRequestDto) {
         validateDuplicateName(signUpRequestDto.getNickname());
-        validatePassword(signUpRequestDto.getPassword(),signUpRequestDto.getPasswordCheck());
+        duplicatePassword(signUpRequestDto.getPassword(),signUpRequestDto.getPasswordCheck());
 
         if (userRepositry.existsByEmail(signUpRequestDto.getEmail())) {
-            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+            throw new ExistsUserEmailException(UserErrorCode.EXISTS_EMAIL);
         }
         if (!authEmailService.getAuthEmailIsChecked(signUpRequestDto.getEmail())) {
-            throw new IllegalArgumentException("인증되지않은 이메일입니다.");
+            throw new UnauthorizedEmailException(UserErrorCode.UNAUTHORIZED_EMAIL);
         }
 
         String encryptionPassword = passwordEncoder.encode(signUpRequestDto.getPassword());
@@ -55,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void sendMail(UserSendMailRequestDto requestDto) {
         String code = mailService.sendMail(requestDto.getEmail());
-        authEmailService.createAuthEmail(requestDto.getEmail(),code);
+        authEmailService.createAuthEmail(requestDto.getEmail());
     }
 
     @Override
@@ -74,13 +85,23 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(UserLoginRequestDto requestDto) {
+    public void login(UserLoginRequestDto requestDto, HttpServletResponse res) {
 
         User user = userRepositry.findByNickname(requestDto.getNickname())
-            .orElseThrow(()->new IllegalArgumentException("닉네임 또는 패스워드를 확인해주세요"));
+            .orElseThrow( ()-> new NotCorrectLoginInput(UserErrorCode.NOT_CORRECT_LOGIN_INPUT));
 
         validatePassword(requestDto.getPassword(), user.getPassword());
-        return jwtUtil.createAccessToken(user.getNickname(), user.getRole().getAuthority());
+        String accessToken = jwtUtil.createAccessToken(user.getNickname(), user.getRole().getAuthority());
+        String refreshToken = jwtUtil.createRefreshToken();
+
+        jwtUtil.addAccessJwtToCookie(accessToken, res);
+        jwtUtil.addRefreshJwtToCookie(refreshToken, res);
+        //response.addHeader(JwtUtil.REFRESH_TOKEN_HEADER, refreshToken);
+
+        refreshToken = refreshToken.split(" ")[1].trim();
+
+        redisUtil.set(refreshToken, user.getId(), REFRESH_TOKEN_TIME);
+
     }
 
     @Override
@@ -91,13 +112,19 @@ public class AuthServiceImpl implements AuthService {
 
     private void validateDuplicateName(String nickname){
         if (userRepositry.existsByNickname(nickname)) {
-            throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
+            throw new ExistsUsernameException(UserErrorCode.EXISTS_USERNAME);
+        }
+    }
+
+    private void duplicatePassword(String ps, String psCheck){
+        if(!ps.equals(psCheck)){
+            throw new PasswordMismatchException(UserErrorCode.PASSWORD_MISMATCH);
         }
     }
 
     private void validatePassword(String ps, String psCheck){
         if(!passwordEncoder.matches(ps,psCheck)){
-            throw new IllegalArgumentException("닉네임 또는 패스워드를 확인해주세요");
+            throw new NotCorrectLoginInput(UserErrorCode.NOT_CORRECT_LOGIN_INPUT);
         }
     }
 

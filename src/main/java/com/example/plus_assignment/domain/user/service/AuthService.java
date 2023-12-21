@@ -6,6 +6,7 @@ import com.example.plus_assignment.domain.user.dto.request.UserNciknameCheckRequ
 import com.example.plus_assignment.domain.user.dto.request.UserSendMailRequestDto;
 import com.example.plus_assignment.domain.user.dto.request.UserSignUpRequestDto;
 import com.example.plus_assignment.domain.user.dto.response.UserCheckCodeResponseDto;
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface AuthService {
 
@@ -15,5 +16,5 @@ public interface AuthService {
     void sendMail(UserSendMailRequestDto requestDto);
     UserCheckCodeResponseDto checkCode(UserCheckCodeRequestDto requestDto);
 
-    String login(UserLoginRequestDto request);
+    void login(UserLoginRequestDto request, HttpServletResponse res);
 }

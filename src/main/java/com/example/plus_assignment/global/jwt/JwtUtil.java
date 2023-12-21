@@ -33,7 +33,8 @@ public class JwtUtil {
     public static final String REFRESH_TOKEN_HEADER = "RefreshToken";
     public static final String AUTHORIZATION_KEY = "auth";
     public static final String BEARER_PREFIX = "Bearer ";
-    public final long ACCESS_TOKEN_TIME = 60 * 30 * 1000 * 24L;
+    //public final long ACCESS_TOKEN_TIME = 60 * 30 * 1000 * 24L;
+    public final long ACCESS_TOKEN_TIME = 30 * 1000; //30초
     public final long REFRESH_TOKEN_TIME = 60 * 60 * 1000L * 24 * 14;
 
     public static final Logger logger = LoggerFactory.getLogger("JWT 관련 로그");
@@ -105,11 +106,25 @@ public class JwtUtil {
         return false;
     }
 
-    public void addJwtToCookie(String token, HttpServletResponse res) {
+    public void addAccessJwtToCookie(String token, HttpServletResponse res) {
         try {
             token = URLEncoder.encode(token, "utf-8").replaceAll("\\+", "%20"); // Cookie Value 에는 공백이 불가능해서 encoding 진행
 
             Cookie cookie = new Cookie(ACCESS_TOKEN_HEADER, token); // Name-Value
+            cookie.setPath("/");
+
+            // Response 객체에 Cookie 추가
+            res.addCookie(cookie);
+        } catch (UnsupportedEncodingException e) {
+            logger.error(e.getMessage());
+        }
+    }
+
+    public void addRefreshJwtToCookie(String token, HttpServletResponse res) {
+        try {
+            token = URLEncoder.encode(token, "utf-8").replaceAll("\\+", "%20"); // Cookie Value 에는 공백이 불가능해서 encoding 진행
+
+            Cookie cookie = new Cookie(REFRESH_TOKEN_HEADER, token); // Name-Value
             cookie.setPath("/");
 
             // Response 객체에 Cookie 추가
@@ -125,11 +140,11 @@ public class JwtUtil {
     }
 
 
-    public String getTokenFromRequest(HttpServletRequest req) {
+    public String getTokenFromRequest(HttpServletRequest req, String tokenHeader) {
         Cookie[] cookies = req.getCookies();
         if(cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(ACCESS_TOKEN_HEADER)) {
+                if (cookie.getName().equals(tokenHeader)) {
                     try {
                         return URLDecoder.decode(cookie.getValue(), "UTF-8"); // Encode 되어 넘어간 Value 다시 Decode
                     } catch (UnsupportedEncodingException e) {

@@ -2,6 +2,7 @@ package com.example.plus_assignment.domain.user.dto.request;
 
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.Pattern;
@@ -22,6 +23,15 @@ public class UserSignUpRequestDto {
 
     @Pattern(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$", message = "적절하지 않는 이메일 형식입니다.")
     private String email;
+
+    @Builder
+    private UserSignUpRequestDto(String nickname, String password, String passwordCheck, String email){
+        this.nickname = nickname;
+        this.password = password;
+        this.passwordCheck = passwordCheck;
+        this.email = email;
+
+    }
 
 
 }
