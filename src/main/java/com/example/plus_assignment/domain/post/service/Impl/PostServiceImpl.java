@@ -15,6 +15,9 @@ import com.example.plus_assignment.domain.user.entity.User;
 import com.example.plus_assignment.domain.user.exception.NotFoundUserException;
 import com.example.plus_assignment.domain.user.exception.UserErrorCode;
 import com.example.plus_assignment.domain.user.repository.UserRepositry;
+import com.example.plus_assignment.global.s3.S3util;
+import com.example.plus_assignment.global.s3.S3util.ImagePath;
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepositry userRepositry;
+    private final S3util s3util;
 
     @Override
     @Transactional(readOnly = true)
@@ -75,9 +80,16 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDetailResponseDto createPost(PostRequestDto postRequestDto, User user) {
+    public PostDetailResponseDto createPost(PostRequestDto postRequestDto, User user, MultipartFile multipartFile)
+        throws IOException {
 
         User findUser = findUserById(user.getId());
+
+        if(!(multipartFile.isEmpty() || multipartFile == null)){
+            String imageName = s3util.uploadImage(multipartFile, ImagePath.MENU);
+            String imagePath = s3util.getImagePath(imageName, ImagePath.MENU);
+        }
+
 
         Post post = Post.builder()
             .title(postRequestDto.getTitle())

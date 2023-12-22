@@ -5,15 +5,18 @@ import com.example.plus_assignment.domain.post.dto.response.PostDetailResponseDt
 import com.example.plus_assignment.domain.post.dto.response.PostPreviewResponseDto;
 import com.example.plus_assignment.domain.post.entity.Post;
 import com.example.plus_assignment.domain.user.entity.User;
+import java.io.IOException;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface PostService {
 
     Page<PostPreviewResponseDto> getPostAll(int page, int size, String sortBy, boolean isAsc);
 
-    PostDetailResponseDto createPost(PostRequestDto postRequestDto, User user);
+    PostDetailResponseDto createPost(PostRequestDto postRequestDto, User user, MultipartFile multipartFile)
+        throws IOException;
 
     PostDetailResponseDto getPost(Long postId);
 
