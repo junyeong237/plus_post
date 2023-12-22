@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostDetailResponseDto {
 
+    Long id;
     String title;
     String content;
 
@@ -21,6 +22,7 @@ public class PostDetailResponseDto {
 
     @Builder
     public PostDetailResponseDto(Post post){
+        this.id = post.getId();
         this.title = post.getTitle();
         this.content = post.getContent();
         this.commentList = post.getCommentList().stream()

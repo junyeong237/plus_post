@@ -80,17 +80,14 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom{
             }
         }
 
-
-
-
-
         List<Post> content = query
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
 
-        long totalCount = content.size(); //2번
+        long totalCount = content.size(); //2번 offset내에 있는 갯수
         //return new PageImpl<>(content, pageable, totalCount);
+        //slice?
 
 
         return PageableExecutionUtils.getPage(content, pageable, () -> totalCount); // 이게 더 최적화

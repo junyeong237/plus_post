@@ -70,7 +70,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             String subRefreshToken = jwtUtil.substringToken(refreshToken);
             if (StringUtils.hasText(subRefreshToken) && jwtUtil.validateToken(subRefreshToken)
                 && redisUtil.hasKey(subRefreshToken)) {
+
                 Long userId = (Long) redisUtil.get(subRefreshToken);
+
                 UserDetailsImpl userDetails = userDetailsService.loadUserById(userId);
                 accessToken = jwtUtil.createAccessToken(
                         userDetails.getUsername(),
