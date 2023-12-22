@@ -80,15 +80,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDetailResponseDto createPost(PostRequestDto postRequestDto, User user, MultipartFile multipartFile)
+    public PostDetailResponseDto createPost(PostRequestDto postRequestDto, User user)
         throws IOException {
 
         User findUser = findUserById(user.getId());
 
-        if(!(multipartFile.isEmpty() || multipartFile == null)){
-            String imageName = s3util.uploadImage(multipartFile, ImagePath.MENU);
-            String imagePath = s3util.getImagePath(imageName, ImagePath.MENU);
-        }
+//        if(!(multipartFile.isEmpty() || multipartFile == null)){
+//            String imageName = s3util.uploadImage(multipartFile, ImagePath.MENU);
+//            String imagePath = s3util.getImagePath(imageName, ImagePath.MENU);
+//        }
 
 
         Post post = Post.builder()

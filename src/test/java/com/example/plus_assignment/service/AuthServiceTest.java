@@ -26,7 +26,7 @@ import static org.mockito.BDDMockito.given;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD) // 기본값 테스트마다 인스턴스 공유안함
 @SpringBootTest
-
+@Transactional
 public class AuthServiceTest {
 
 
@@ -47,7 +47,7 @@ public class AuthServiceTest {
     public void 회원가입테스트() {
 
         UserSignUpRequestDto signUpRequestDto = UserSignUpRequestDto.builder()
-            .nickname("parak")
+            .nickname("parak1")
             .password("123456789")
             .passwordCheck("123456789")
             .email("12345@naver.com")
@@ -66,7 +66,7 @@ public class AuthServiceTest {
 
     @Test
     @DisplayName("로그인 테스트")
-    public void 로그인테스트() { // 서비스에서 다른서비스가 같이 사용되면 이게 좀 애매하네...
+    public void 로그인테스트() {
 
         User user = User.builder()
             .nickname("parak")

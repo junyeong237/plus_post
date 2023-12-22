@@ -14,6 +14,7 @@ import com.example.plus_assignment.domain.post.service.Impl.PostServiceImpl;
 import com.example.plus_assignment.domain.user.entity.User;
 import com.example.plus_assignment.domain.user.entity.UserRoleEnum;
 import com.example.plus_assignment.domain.user.repository.UserRepositry;
+import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -43,6 +44,9 @@ public class PostIntegrationTest {
     private User tempUser;
     private Post post;
 
+
+    private Long createdPostId;
+
     @Autowired
     private PostServiceImpl postService;
 
@@ -64,7 +68,7 @@ public class PostIntegrationTest {
     @Order(1)
     @DisplayName("게시물 생성테스트")
     //@Transactional(readOnly = true)
-    void 게시물생성() {
+    void 게시물생성() throws IOException {
         //setup();
         PostRequestDto postRequestDto = PostRequestDto.builder()
             .title("제목2")
@@ -74,6 +78,7 @@ public class PostIntegrationTest {
         User finduser = userRepository.findByNickname(user.getNickname()).orElse(null);
 
         PostDetailResponseDto responseDto = postService.createPost(postRequestDto, finduser);
+        createdPostId = responseDto.getId();
         assertNotNull(responseDto);
 
         assertEquals("제목2", responseDto.getTitle());
@@ -94,7 +99,7 @@ public class PostIntegrationTest {
 
         User findUser = userRepository.findByNickname(user.getNickname()).orElse(null);
 
-        PostDetailResponseDto responseDto = postService.updatePost(findUser,1L,postRequestDto);
+        PostDetailResponseDto responseDto = postService.updatePost(findUser,createdPostId,postRequestDto);
 
         assertNotNull(responseDto);
 
@@ -112,7 +117,7 @@ public class PostIntegrationTest {
 
         User findUser = userRepository.findByNickname(user.getNickname()).orElse(null);
 
-        postService.deletePost(findUser,1L);
+        postService.deletePost(findUser,createdPostId);
 
         List<PostPreviewResponseDto> postlist =
             postService.getPostAll(0,3,"title",true).getContent();

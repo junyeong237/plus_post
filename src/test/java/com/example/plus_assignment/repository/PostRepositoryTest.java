@@ -49,6 +49,8 @@ public class PostRepositoryTest {
     @BeforeEach
     void setup() {
         // Given
+        userRepository.deleteAll();
+        postRepository.deleteAll();
         this.user = User.builder()
             .nickname("park")
             .password("123456789")

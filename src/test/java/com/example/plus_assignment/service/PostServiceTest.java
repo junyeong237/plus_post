@@ -13,6 +13,7 @@ import com.example.plus_assignment.domain.post.service.Impl.PostServiceImpl;
 import com.example.plus_assignment.domain.user.entity.User;
 import com.example.plus_assignment.domain.user.entity.UserRoleEnum;
 import com.example.plus_assignment.domain.user.repository.UserRepositry;
+import java.io.IOException;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,13 +25,14 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 //
 //@RunWith(MockitoJUnitRunner.class) // junit4용
 @TestInstance(TestInstance.Lifecycle.PER_METHOD) // 기본값 테스트마다 인스턴스 공유안함
 
 @ExtendWith(MockitoExtension.class) // junit5용
-
+@Transactional
 public class PostServiceTest {
     @Mock
     private PostRepository postRepository;
@@ -43,7 +45,7 @@ public class PostServiceTest {
 
     @Test
     @DisplayName("Post 생성 테스트")
-    public void testCreate() {
+    public void testCreate() throws IOException {
         // Given
         Long userId = 1L;
 
@@ -99,7 +101,7 @@ public class PostServiceTest {
             .content("내용수정1")
             .build();
 
-
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
         given(postRepository.findById(postId)).willReturn(Optional.of(post));
 
         //When

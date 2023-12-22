@@ -15,7 +15,7 @@ public interface PostService {
 
     Page<PostPreviewResponseDto> getPostAll(int page, int size, String sortBy, boolean isAsc);
 
-    PostDetailResponseDto createPost(PostRequestDto postRequestDto, User user, MultipartFile multipartFile)
+    PostDetailResponseDto createPost(PostRequestDto postRequestDto, User user)
         throws IOException;
 
     PostDetailResponseDto getPost(Long postId);

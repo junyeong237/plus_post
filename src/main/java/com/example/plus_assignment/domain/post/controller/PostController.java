@@ -86,12 +86,13 @@ public class PostController {
 
     @PostMapping
     public PostDetailResponseDto createPost(
-        @RequestPart(value = "dto") PostRequestDto postRequestDto,
-        @RequestPart(value = "image",required = false) MultipartFile multipartFile,
+        //@RequestPart(value = "dto") PostRequestDto postRequestDto,
+        //@RequestPart(value = "image",required = false) MultipartFile multipartFile,
+        @RequestBody PostRequestDto postRequestDto,
         @AuthenticationPrincipal UserDetailsImpl userDetails
     ) throws IOException {
 
-        PostDetailResponseDto post = postService.createPost(postRequestDto,userDetails.getUser(),multipartFile);
+        PostDetailResponseDto post = postService.createPost(postRequestDto,userDetails.getUser());
         return post;
     }
 
