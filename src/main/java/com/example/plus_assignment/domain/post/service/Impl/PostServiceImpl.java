@@ -1,5 +1,7 @@
 package com.example.plus_assignment.domain.post.service.Impl;
 
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
+
 import com.example.plus_assignment.domain.post.dto.request.PostRequestDto;
 import com.example.plus_assignment.domain.post.dto.response.PostDetailResponseDto;
 import com.example.plus_assignment.domain.post.dto.response.PostPreviewResponseDto;
@@ -24,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional//(propagation = REQUIRES_NEW)
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepositry userRepositry;
@@ -103,9 +105,11 @@ public class PostServiceImpl implements PostService {
     public PostDetailResponseDto updatePost(User user, Long postId,
         PostRequestDto postRequestDto) {
 
+        User findUser = findUserById(user.getId());
+
         Post post = findPostById(postId);
 
-        validatePostUser(user,post);
+        validatePostUser(findUser,post);
 
         post.update(postRequestDto);
 
@@ -115,9 +119,11 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void deletePost(User user, Long postId) {
+
+        User findUser = findUserById(user.getId());
         Post post = findPostById(postId);
 
-        validatePostUser(user,post);
+        validatePostUser(findUser,post);
 
         postRepository.delete(post);
     }
