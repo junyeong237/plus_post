@@ -3,11 +3,8 @@ package com.example.plus_assignment.domain.comment.repository;
 import com.example.plus_assignment.domain.comment.entity.Comment;
 import com.example.plus_assignment.domain.comment.entity.QComment;
 import com.example.plus_assignment.domain.post.entity.Post;
-import com.example.plus_assignment.domain.post.entity.QPost;
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -24,10 +21,8 @@ import org.springframework.stereotype.Repository;
 public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
     @Override
-    public Page<Comment> getCommentList(final Pageable pageable) {
+    public Page<Comment> getCommentList(Pageable pageable) {
         QComment comment = QComment.comment;
-
-        BooleanBuilder whereBuilder = new BooleanBuilder();
 
         JPAQuery<Comment> query =  jpaQueryFactory.selectFrom(comment);
 
@@ -40,8 +35,6 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
 
             }
         }
-
-
         List<Comment> content = query
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
