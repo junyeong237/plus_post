@@ -1,9 +1,9 @@
 package com.example.plus_assignment;
 
 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 import com.example.plus_assignment.domain.post.dto.request.PostRequestDto;
 import com.example.plus_assignment.domain.post.dto.response.PostDetailResponseDto;
@@ -16,23 +16,20 @@ import com.example.plus_assignment.domain.user.entity.UserRoleEnum;
 import com.example.plus_assignment.domain.user.repository.UserRepositry;
 import java.io.IOException;
 import java.util.List;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS) // 테스트 인스턴스의 생성 단위를 클래스로 변경합니다.
-public class PostIntegrationTest {
+public class PostEachTransactionalTest {
 
     @Autowired
     private PostRepository postRepository;
@@ -42,16 +39,11 @@ public class PostIntegrationTest {
 
 
     private User user;
-    private User tempUser;
-    private Post post;
-
-
-    private Long createdPostId;
 
     @Autowired
     private PostServiceImpl postService;
 
-    @BeforeAll
+    @BeforeEach
     void setup() {
         // Given
         this.user = User.builder()
@@ -63,12 +55,10 @@ public class PostIntegrationTest {
         userRepository.save(user);
     }
 
-
-
     @Test
     @Order(1)
     @DisplayName("게시물 생성테스트")
-    //@Transactional(readOnly = true)
+    @Transactional
     void 게시물생성() throws IOException {
         //setup();
         PostRequestDto postRequestDto = PostRequestDto.builder()
@@ -77,11 +67,8 @@ public class PostIntegrationTest {
             .build();
 
         User finduser = userRepository.findByNickname(user.getNickname()).orElse(null);
-        //여기는 왜 finduser랑 user랑 객체번호가 다르지
-        //여기는 이미 user가 save될때 transactional이끝나서 finduser는 DB에서 꺼내온거라 객체번호가 다른듯?
 
         PostDetailResponseDto responseDto = postService.createPost(postRequestDto, finduser);
-        createdPostId = responseDto.getId();
         assertNotNull(responseDto);
 
         assertEquals("제목2", responseDto.getTitle());
@@ -89,38 +76,60 @@ public class PostIntegrationTest {
 
     }
 
+
     @Test
     @Order(2)
     @DisplayName("게시물 수정 테스트")
-    //@Transactional(readOnly = true)
-    void 게시물수정() {
-        //setup();
+    @Transactional
+        //@Transactional(readOnly = true)
+    void 게시물수정() throws IOException {
+
         PostRequestDto postRequestDto = PostRequestDto.builder()
+            .title("제목2")
+            .content("내용2")
+            .build();
+
+        User finduser = userRepository.findByNickname(user.getNickname()).orElse(null);
+
+        PostDetailResponseDto responseDto = postService.createPost(postRequestDto, finduser);
+
+        PostRequestDto postUpdateRequestDto = PostRequestDto.builder()
             .title("제목수정2")
             .content("내용수정2")
             .build();
 
-        User findUser = userRepository.findByNickname(user.getNickname()).orElse(null);
+        PostDetailResponseDto responseUpdateDto = postService.updatePost(finduser,responseDto.getId(),postUpdateRequestDto);
 
-        PostDetailResponseDto responseDto = postService.updatePost(findUser,createdPostId,postRequestDto);
-
-        assertNotNull(responseDto);
+        assertNotNull(responseUpdateDto);
 
 
-        assertEquals("제목수정2", responseDto.getTitle());
-        assertEquals("내용수정2", responseDto.getContent());
+        assertEquals("제목수정2", responseUpdateDto.getTitle());
+        assertEquals("내용수정2", responseUpdateDto.getContent());
 
     }
+
 
     @Test
     @Order(3)
     @DisplayName("게시물 삭제&조회 테스트")
-    void 게시물삭제후조회() {
+    @Transactional
+    void 게시물삭제후조회() throws IOException {
+        PostRequestDto postRequestDto = PostRequestDto.builder()
+            .title("제목2")
+            .content("내용2")
+            .build();
 
+        User finduser = userRepository.findByNickname(user.getNickname()).orElse(null);
+
+        PostDetailResponseDto responseDto = postService.createPost(postRequestDto, finduser);
+        assertNotNull(responseDto);
+
+        assertEquals("제목2", responseDto.getTitle());
+        assertEquals("내용2", responseDto.getContent());
 
         User findUser = userRepository.findByNickname(user.getNickname()).orElse(null);
 
-        postService.deletePost(findUser,createdPostId);
+        postService.deletePost(findUser,responseDto.getId());
 
         List<PostPreviewResponseDto> postlist =
             postService.getPostAll(0,3,"title",true).getContent();
@@ -128,14 +137,10 @@ public class PostIntegrationTest {
         assertEquals(true, postlist.isEmpty());
         assertEquals(0, postlist.size());
 
-    }
+        List<User> userList = userRepository.findAll();
 
-    @AfterAll
-    void deleteAll(){
-        userRepository.deleteAll();
-        postRepository.deleteAll();
-        //transactional이 안걸려있는 같은 인스턴스를 공유하는 테스트클래스라서 repo를 수동으로 비워줘야한다.
-    }
+        assertEquals(1,userList.size());
 
+    }
 
 }

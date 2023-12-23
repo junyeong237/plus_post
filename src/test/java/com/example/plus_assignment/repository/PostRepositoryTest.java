@@ -49,18 +49,16 @@ public class PostRepositoryTest {
     @BeforeEach
     void setup() {
         // Given
-        userRepository.deleteAll();
-        postRepository.deleteAll();
         this.user = User.builder()
-            .nickname("park")
+            .nickname("parkk")
             .password("123456789")
             .role(UserRoleEnum.USER)
-            .email("123@naver.com")
+            .email("123123@naver.com")
             .build();
         userRepository.save(user);
 
         this.tempUser = User.builder()
-            .nickname("아무사람")
+            .nickname("아무사람1")
             .password("123456789")
             .email("temptemp@naver.com")
             .role(UserRoleEnum.USER)
@@ -69,25 +67,10 @@ public class PostRepositoryTest {
 
         this.post = Post.builder()
             .content("내용입니다.")
-            .id(1L)//이거 안해줘도 오류안남
             .title("제목입니다.")
             .user(user)
             .build();
         postRepository.save(post);
-    }
-
-    @Test
-    @DisplayName("Repository 테스트")
-    //@Transactional
-    void test() {
-        //setup();
-        // When
-        Optional<Post> foundPost = postRepository.findById(1L);
-
-        // Then
-        assertTrue(foundPost.isPresent());
-        assertEquals(post.getId(), foundPost.get().getId());
-
     }
 
     @Test

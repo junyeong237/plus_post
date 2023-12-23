@@ -69,7 +69,7 @@ public class AuthServiceTest {
     public void 로그인테스트() {
 
         User user = User.builder()
-            .nickname("parak")
+            .nickname("parakk")
             .password(passwordEncoder.encode("123456789"))
             .role(UserRoleEnum.USER)
             .email("1234@naver.com")
@@ -78,7 +78,7 @@ public class AuthServiceTest {
         userRepositry.save(user);
 
         UserLoginRequestDto requestDto = UserLoginRequestDto.builder()
-            .nickname("parak")
+            .nickname("parakk")
             .password("123456789")
             .build();
 

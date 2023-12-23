@@ -1,9 +1,7 @@
 package com.example.plus_assignment;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 import com.example.plus_assignment.domain.post.dto.request.PostRequestDto;
 import com.example.plus_assignment.domain.post.dto.response.PostDetailResponseDto;
@@ -17,23 +15,20 @@ import com.example.plus_assignment.domain.user.repository.UserRepositry;
 import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.transaction.annotation.Transactional;
+
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS) // 테스트 인스턴스의 생성 단위를 클래스로 변경합니다.
-public class PostIntegrationTest {
 
+//@TestInstance를 안쓰고 @SpringBootTest만 써서 통합테스트 해보기
+public class PostIntegrationNotTestInstanceTest {
     @Autowired
     private PostRepository postRepository;
 
@@ -41,20 +36,22 @@ public class PostIntegrationTest {
     private UserRepositry userRepository;
 
 
-    private User user;
-    private User tempUser;
-    private Post post;
-
-
-    private Long createdPostId;
+    private static User user; //테스트 메서드마다 인스턴스가 달라지기때문에 static이 아닌 그냥 user를 사용하면 안된다.
 
     @Autowired
     private PostServiceImpl postService;
 
-    @BeforeAll
-    void setup() {
+    //@BeforeAll
+    void setup() { //@TestInstance(TestInstance.Lifecycle.PER_CLASS) 가 없으면 무조건 beforeAll에서 static이 붙어ㅓ야함.
+        //정적 메서드로 선언하는 이유는 테스트 클래스의 인스턴스를 생성하지 않고도 호출할 수 있도록 하기 위함입니다.
+        // JUnit은 테스트 클래스의 인스턴스를 생성하지 않고도 @BeforeAll이 붙은 메서드를 호출하는데,
+        // 이는 정적(static) 메서드만 호출할 수 있기 때문입니다.
+
+        //@Before + static메서드로 사용할랬더니 userRepository도 static으로 선언해야하는데 이때 userRepository는
+        //주입받아서 사용되는거라 뭔가 충돌이 나는듯하다.
+
         // Given
-        this.user = User.builder()
+        user = User.builder() //static user가 아닐경우 각 테스트 인스턴스마다 this.user객체가 달라져서 static으로 공통적으로 사용
             .nickname("park")
             .password("123456789")
             .role(UserRoleEnum.USER)
@@ -68,20 +65,17 @@ public class PostIntegrationTest {
     @Test
     @Order(1)
     @DisplayName("게시물 생성테스트")
-    //@Transactional(readOnly = true)
+        //@Transactional(readOnly = true)
     void 게시물생성() throws IOException {
-        //setup();
+        setup();
         PostRequestDto postRequestDto = PostRequestDto.builder()
             .title("제목2")
             .content("내용2")
             .build();
 
         User finduser = userRepository.findByNickname(user.getNickname()).orElse(null);
-        //여기는 왜 finduser랑 user랑 객체번호가 다르지
-        //여기는 이미 user가 save될때 transactional이끝나서 finduser는 DB에서 꺼내온거라 객체번호가 다른듯?
 
         PostDetailResponseDto responseDto = postService.createPost(postRequestDto, finduser);
-        createdPostId = responseDto.getId();
         assertNotNull(responseDto);
 
         assertEquals("제목2", responseDto.getTitle());
@@ -92,50 +86,66 @@ public class PostIntegrationTest {
     @Test
     @Order(2)
     @DisplayName("게시물 수정 테스트")
-    //@Transactional(readOnly = true)
-    void 게시물수정() {
-        //setup();
+        //@Transactional(readOnly = true)
+    void 게시물수정() throws IOException {
         PostRequestDto postRequestDto = PostRequestDto.builder()
+            .title("제목2")
+            .content("내용2")
+            .build();
+
+        User finduser = userRepository.findByNickname(user.getNickname()).orElse(null);
+
+        PostDetailResponseDto responseDto = postService.createPost(postRequestDto, finduser);
+
+
+        PostRequestDto postUpdateRequestDto = PostRequestDto.builder()
             .title("제목수정2")
             .content("내용수정2")
             .build();
 
         User findUser = userRepository.findByNickname(user.getNickname()).orElse(null);
 
-        PostDetailResponseDto responseDto = postService.updatePost(findUser,createdPostId,postRequestDto);
+        PostDetailResponseDto responseUpdateDto = postService.updatePost(findUser,responseDto.getId(),postUpdateRequestDto);
 
-        assertNotNull(responseDto);
+        assertNotNull(responseUpdateDto);
 
 
-        assertEquals("제목수정2", responseDto.getTitle());
-        assertEquals("내용수정2", responseDto.getContent());
+        assertEquals("제목수정2", responseUpdateDto.getTitle());
+        assertEquals("내용수정2", responseUpdateDto.getContent());
 
     }
 
     @Test
     @Order(3)
     @DisplayName("게시물 삭제&조회 테스트")
-    void 게시물삭제후조회() {
+    void 게시물삭제후조회() throws IOException {
+
+        PostRequestDto postRequestDto = PostRequestDto.builder()
+            .title("제목2")
+            .content("내용2")
+            .build();
+
+        User finduser = userRepository.findByNickname(user.getNickname()).orElse(null);
+
+        PostDetailResponseDto responseDto = postService.createPost(postRequestDto, finduser);
 
 
         User findUser = userRepository.findByNickname(user.getNickname()).orElse(null);
 
-        postService.deletePost(findUser,createdPostId);
+        postService.deletePost(findUser,responseDto.getId());
 
         List<PostPreviewResponseDto> postlist =
             postService.getPostAll(0,3,"title",true).getContent();
 
-        assertEquals(true, postlist.isEmpty());
-        assertEquals(0, postlist.size());
-
+        assertEquals(false, postlist.isEmpty());
+        assertEquals(2, postlist.size());
+        deleteAll();
     }
 
-    @AfterAll
+
     void deleteAll(){
         userRepository.deleteAll();
-        postRepository.deleteAll();
-        //transactional이 안걸려있는 같은 인스턴스를 공유하는 테스트클래스라서 repo를 수동으로 비워줘야한다.
+        //이것도 트랜잭션이 안걸려있어서 수동으로 지워줘야하는듯?
     }
-
 
 }
