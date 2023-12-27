@@ -19,7 +19,7 @@ public class AOP {
     //@Pointcut("execution(* com.example.dp.domain.admin.controller.*(..))") //랑 다르다???//안되는거
     //@Pointcut("execution(* com.example.dp.domain.admin.*.controller.*(..))") //된다
     //execution(* com.example.dp.domain.admin.*.controller.*(..))
-    private void checkPost() {}//asdasd
+    private void checkPost() {}//asdasdasdad
 
     @Pointcut("execution(* com.example.plus_assignment.domain.user.controller.*.*(..))") // 되는거
     private void checkUser() {}
