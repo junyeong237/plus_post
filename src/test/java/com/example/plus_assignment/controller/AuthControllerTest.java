@@ -60,9 +60,9 @@ public class AuthControllerTest {
     AuthServiceImpl authService;
 
     //@Mock
-    @MockBean
-    JwtUtil jwtUtil; // 이거 테스트코드에서 안쓰더라도 Controller코드에서 주입되야하는코드는 Mock으로라도 무조건 선언해줘야한다.
-
+//    @MockBean
+//    JwtUtil jwtUtil; // 이거 테스트코드에서 안쓰더라도 Controller코드에서 주입되야하는코드는 Mock으로라도 무조건 선언해줘야한다.
+    //AuthController에서 안쓰길래 controller에서 주석처리하고 여기도 주석처리해줬더니 작동
     private static final String BASE_URL = "/api";
 
 

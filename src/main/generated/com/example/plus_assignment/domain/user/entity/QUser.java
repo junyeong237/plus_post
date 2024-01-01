@@ -32,6 +32,10 @@ public class QUser extends EntityPathBase<User> {
 
     public final EnumPath<UserRoleEnum> role = createEnum("role", UserRoleEnum.class);
 
+    public final NumberPath<Long> socialId = createNumber("socialId", Long.class);
+
+    public final EnumPath<com.example.plus_assignment.global.oAuth.SocialType> socialType = createEnum("socialType", com.example.plus_assignment.global.oAuth.SocialType.class);
+
     public QUser(String variable) {
         super(User.class, forVariable(variable));
     }

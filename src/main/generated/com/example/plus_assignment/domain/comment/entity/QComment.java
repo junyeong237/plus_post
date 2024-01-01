@@ -24,15 +24,21 @@ public class QComment extends EntityPathBase<Comment> {
 
     public final com.example.plus_assignment.domain.model.QTimeEntity _super = new com.example.plus_assignment.domain.model.QTimeEntity(this);
 
+    public final ListPath<Comment, QComment> childList = this.<Comment, QComment>createList("childList", Comment.class, QComment.class, PathInits.DIRECT2);
+
     public final StringPath content = createString("content");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
+    public final BooleanPath deleted = createBoolean("deleted");
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
+
+    public final QComment parent;
 
     public final com.example.plus_assignment.domain.post.entity.QPost post;
 
@@ -56,6 +62,7 @@ public class QComment extends EntityPathBase<Comment> {
 
     public QComment(Class<? extends Comment> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.parent = inits.isInitialized("parent") ? new QComment(forProperty("parent"), inits.get("parent")) : null;
         this.post = inits.isInitialized("post") ? new com.example.plus_assignment.domain.post.entity.QPost(forProperty("post"), inits.get("post")) : null;
         this.user = inits.isInitialized("user") ? new com.example.plus_assignment.domain.user.entity.QUser(forProperty("user")) : null;
     }

@@ -2,6 +2,7 @@ package com.example.plus_assignment.domain.user.entity;
 
 
 import com.example.plus_assignment.domain.post.entity.Post;
+import com.example.plus_assignment.global.oAuth.SocialType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,13 +48,24 @@ public class User {
     //mappedBy 안쓰면 기본키 id값없는 중간테이블이 자동으로 생기더라..
 
 
+    private Long socialId;
+
+    @Enumerated(EnumType.STRING)
+    private SocialType socialType;
+
+
     @Builder
-    private User(Long id,String nickname, String password,String email,UserRoleEnum role) {
+    private User(Long id,String nickname, String password,String email,UserRoleEnum role, Long socialId) {
         this.id = id;
         this.password = password;
         this.nickname = nickname;
         this.email = email;
         this.role = role;
+        this.socialId = socialId;
+    }
+
+    public void socialIdUpdate(Long socialId){
+        this.socialId = socialId;
     }
 
 }

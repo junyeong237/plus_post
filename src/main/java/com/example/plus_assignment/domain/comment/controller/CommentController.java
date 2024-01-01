@@ -1,19 +1,18 @@
 package com.example.plus_assignment.domain.comment.controller;
 
 
+import com.example.plus_assignment.domain.comment.dto.request.CommentReRequestDto;
 import com.example.plus_assignment.domain.comment.dto.request.CommentRequestDto;
+import com.example.plus_assignment.domain.comment.dto.response.CommentReResponseDto;
 import com.example.plus_assignment.domain.comment.dto.response.CommentResponseDto;
-import com.example.plus_assignment.domain.comment.entity.Comment;
 import com.example.plus_assignment.domain.comment.service.impl.CommentServiceImpl;
 import com.example.plus_assignment.global.security.UserDetailsImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,6 +36,17 @@ public class CommentController {
 
         CommentResponseDto responseDto = commentService.createComment(postId,requestDto, userDetails.getUser());
         return responseDto;
+    }
+    @PostMapping("/{postId}/re")
+    public CommentReResponseDto createReComment(
+        @PathVariable Long postId,
+        @Valid @RequestBody CommentReRequestDto requestDto,
+        @AuthenticationPrincipal UserDetailsImpl userDetails
+    ){
+
+        CommentReResponseDto responseDto = commentService.createReComment(postId,requestDto,userDetails.getUser());
+        return responseDto;
+
     }
 
     @GetMapping()
