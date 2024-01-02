@@ -49,7 +49,7 @@ jobs:
       run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://awsdeploybucket/$GITHUB_SHA.zip
 
     - name: Code Deploy #4
-      run: aws deploy create-deployment --application-name codedeploytest
+      run: aws deploy create-deployment --application-name deploy
         --deployment-config-name CodeDeployDefault.OneAtATime
-        --deployment-group-name dev
+        --deployment-group-name devv
         --s3-location bucket=awsdeploybucket,bundleType=zip,key=$GITHUB_SHA.zip   
